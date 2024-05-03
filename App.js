@@ -1,10 +1,28 @@
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
-import { Dimensions, View, StyleSheet, Text, ScrollView } from "react-native";
+import {
+  Dimensions,
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { Fontisto } from "@expo/vector-icons";
 
-const API_KEY = "80d2be0a9e0c408e0e168fd716417e4d";
-//이렇게 API key를 application 에 두는 것은 안전하지 못한 방법.
-const NAVY = "#003366";
+const API_KEY = "ee4e6940f4f2f8319bb46d25576819e7";
+//이렇게 API key를 application 에 두는 것은 안전하지 못한 방법.const NAVY = "#003366";
+
+const icons = {
+  Clouds: "cloudy",
+  Clear: "day-sunny",
+  Snow: "snow",
+  Rain: "rains",
+  Atmosphere: "cloudy-gusts",
+  Drizzle: "rain",
+  Thunderstorm: "lightning",
+};
+
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 //ES6 문법으로 const SCREEN_WIDTH = Dimensions.get("window").width; 와 동일한 의미
 
@@ -28,10 +46,10 @@ export default function App() {
     );
     setCity(`${location[0].city} ${location[0].district}`);
     const response = await fetch(
-      `https://api.openweathermap.org/data/3.0/onecall?lat=${latitude}&lon=${longitude}&exclude=alerts&APPID=${API_KEY}`,
+      `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${API_KEY}&units=metric`,
     );
     const json = await response.json();
-    console.log(json);
+    setDays(json);
   };
 
   useEffect(() => {
@@ -50,22 +68,49 @@ export default function App() {
         showsHorizontalScrollIndicator="false"
         contentContainerStyle={styles.weather}
       >
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.description}>Sunny</Text>
-        </View>
+        {days.length === 0 ? (
+          <View style={styles.day}>
+            <ActivityIndicator
+              color="white"
+              size="large"
+              style={{ marginTop: 10 }}
+            />
+          </View>
+        ) : (
+          // (
+          //   days.map((day, index) => (
+          //     <View key={index} style={styles.day}>
+          //       <Text style={styles.temp}>{day.temp.day}</Text>
+          //       <Text style={styles.description}>{day.weather[0].main}</Text>
+          //     </View>
+          //   ))
+          // )
+
+          <View style={styles.day}>
+            <Text style={styles.temp}>
+              {parseFloat(days.main.temp).toFixed(1)}
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 20,
+                marginBottom: 10,
+                width: "60%",
+              }}
+            >
+              <Text style={styles.description}>{days.weather[0].main}</Text>
+              <Fontisto
+                name={icons[days.weather[0].main]}
+                size={50}
+                color="white"
+              />
+            </View>
+
+            <Text style={styles.tinyText}>{days.weather[0].description}</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -74,7 +119,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: NAVY,
+    backgroundColor: "tomato",
   },
 
   city: {
@@ -85,12 +130,13 @@ const styles = StyleSheet.create({
   },
 
   cityName: {
+    color: "white",
     fontSize: 40,
     fontWeight: "700",
   },
 
   weather: {
-    backgroundColor: "teal",
+    backgroundColor: "tomato",
   },
 
   day: {
@@ -99,13 +145,19 @@ const styles = StyleSheet.create({
   },
 
   temp: {
+    color: "white",
     marginTop: 50,
-    fontSize: 178,
+    fontSize: 158,
     fontWeight: "600",
   },
 
   description: {
+    color: "white",
     marginTop: -30,
     fontSize: 80,
+  },
+  tinyText: {
+    color: "white",
+    fontSize: 25,
   },
 });
